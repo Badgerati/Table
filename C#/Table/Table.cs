@@ -23,6 +23,11 @@ namespace Badgerati.Collection
             get { return _headers; }
         }
 
+        public bool HasHeaders
+        {
+            get { return _headers.Count > 0; }
+        }
+
         private List<TableRow> _rows;
         public IList<TableRow> Rows
         {
@@ -74,7 +79,7 @@ namespace Badgerati.Collection
 
         protected TableRow GetRow(int index)
         {
-            if (_headers.Count == 0)
+            if (!HasHeaders)
                 throw new IndexOutOfRangeException("The Table currently has no Headers");
 
             if (index < 0 || index >= _rows.Count)
@@ -88,7 +93,7 @@ namespace Badgerati.Collection
 
         public bool AddRow(object[] items)
         {
-            if (_headers.Count == 0)
+            if (!HasHeaders)
                 return false;
 
             if (items.Length != _headers.Count)
@@ -102,9 +107,26 @@ namespace Badgerati.Collection
 
 
 
+        public void RemoveRow(int index)
+        {
+            if (index < 0 || index >= _rows.Count)
+                throw new IndexOutOfRangeException();
+
+            _rows.RemoveAt(index);
+        }
+
+
+
+        public bool RemoveRow(TableRow row)
+        {
+            return _rows.Remove(row);
+        }
+
+
+
         protected bool UpdateRow(int index, TableRow row)
         {
-            if (_headers.Count == 0)
+            if (!HasHeaders)
                 return false;
 
             if (index < 0 || index >= _rows.Count)
@@ -122,7 +144,7 @@ namespace Badgerati.Collection
 
         public TableColumn GetColumn(string header)
         {
-            if (_headers.Count == 0)
+            if (!HasHeaders)
                 throw new IndexOutOfRangeException("The Table currently has no Headers");
 
             TableColumn column = new TableColumn(header);
@@ -147,7 +169,45 @@ namespace Badgerati.Collection
 
             for (int i = 0; i < _rows.Count; i++)
             {
-                _rows[i].AddHeader(header);
+                _rows[i].AddItem(header);
+            }
+
+            return true;
+        }
+
+
+
+
+        public bool AddColumn(string header, object[] items)
+        {
+            if (_headers.Contains(header))
+                return false;
+
+            if (items.Length != _rows.Count())
+                return false;
+
+            _headers.Add(header);
+
+            for (int i = 0; i < _rows.Count; i++)
+            {
+                _rows[i].AddItem(header, items[i]);
+            }
+
+            return true;
+        }
+
+
+
+        public bool RemoveColumn(string header)
+        {
+            if (!_headers.Contains(header))
+                return false;
+
+            _headers.Remove(header);
+
+            for (int i = 0; i < _rows.Count(); i++)
+            {
+                _rows[i].RemoveItem(header);
             }
 
             return true;
@@ -158,10 +218,13 @@ namespace Badgerati.Collection
 
         protected bool UpdateColumn(string header, TableColumn column)
         {
-            if (_headers.Contains(header))
+            if (!_headers.Contains(header))
                 return false;
 
-            if (_rows.Count == 0 || _headers.Count == 0)
+            if (_rows.Count == 0 || !HasHeaders)
+                return false;
+
+            if (_rows.Count != column.Count)
                 return false;
 
             for (int i = 0; i < _rows.Count; i++)

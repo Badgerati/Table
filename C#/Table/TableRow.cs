@@ -44,16 +44,23 @@ namespace Badgerati.Collection
 
 
 
-        public void AddHeader(string header)
+        public void AddItem(string header)
         {
             _row.Add(header, null);
         }
 
 
 
-        public void AddHeader(string header, object item)
+        public void AddItem(string header, object item)
         {
             _row.Add(header, item);
+        }
+
+
+
+        public bool RemoveItem(string header)
+        {
+            return _row.Remove(header);
         }
 
     }
